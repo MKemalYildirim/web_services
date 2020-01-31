@@ -53,10 +53,14 @@ def post():
 
 @app.route("/delete/<string:name>")
 def DELETE(name):
-    user=User.query.filter_by(username=name).first()
-    db.session.delete(user)
-    db.session.commit()
-    return "Silme başarılı"
+    try:
+     user=User.query.filter_by(username=name).first()
+     db.session.delete(user)
+     db.session.commit()
+     return "Silme başarılı"
+    except:
+      return "Kişi Bulunamadı"
+    
     
 
     
