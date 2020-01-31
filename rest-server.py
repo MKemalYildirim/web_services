@@ -12,7 +12,7 @@ db = SQLAlchemy(app)
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    password = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(120), unique=False, nullable=False)
 
 
 app = Flask(__name__)
@@ -42,11 +42,14 @@ def post():
     content = request.get_json()
     name=content['name']
     pas=content['pass']
-
-    new_user=User(username=name,password=pas)
-    db.session.add(new_user)
-    db.session.commit()
-    return 'JSON posted'
+    try:
+     new_user=User(username=name,password=pas)
+     db.session.add(new_user)
+     db.session.commit()
+     return "Ekleme Başarılı"
+    except:
+     return "Başarısız Giriş"
+   
 
 @app.route("/delete/<string:name>")
 def DELETE(name):
@@ -56,10 +59,7 @@ def DELETE(name):
     return "Silme başarılı"
     
 
-    new_user=User(username=name,password=pas)
-    db.session.add(new_user)
-    db.session.commit()
-    return 'Ekleme Başarılı'
+    
 
 
 if __name__ == '__main__':
