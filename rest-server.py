@@ -1,69 +1,58 @@
 #!flask/bin/python
-
 from flask import Flask, jsonify, abort, request, make_response, url_for
 from flask_httpauth import HTTPBasicAuth
 from flask_sqlalchemy import SQLAlchemy
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/Mehmet_Kemal/Desktop/web_services/veriler.db'
-db = SQLAlchemy(app)
-
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password = db.Column(db.String(120), unique=False, nullable=False)
+from sqlalchemy.orm import session
+import models
 
 
 app = Flask(__name__)
-db.create_all()
 
 auth = HTTPBasicAuth()
 
 @auth.get_password
-def get_password(username):
-    if username == 'kemal':
-        return '123'
-    return None
-
+def get_password(name):
+        user =models.User.query.filter_by(username=name).first()
+        if name == user.username:
+            return user.password
+        return None
+    
 @auth.error_handler
 def unauthorized():
-    return make_response(jsonify( { 'error': 'Unauthorized access' } ), 401)    
+    return make_response(jsonify( { 'error': 'Unauthorized access' } ), 401) 
 
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify( { 'error': 'Not found' } ), 404)
 
 
-
 @app.route("/add", methods=['POST'])
 def post():
-    print(request.is_json)
+
     content = request.get_json()
     name=content['name']
     pas=content['pass']
     try:
-     new_user=User(username=name,password=pas)
-     db.session.add(new_user)
-     db.session.commit()
+     new_user=models.User(username=name,password=pas)
+     models.db.session.add(new_user)
+     models.db.session.commit()
      return "Ekleme Başarılı"
     except:
-     return "Başarısız Giriş"
-   
+     return "Ekleme Başarısız"
+
 
 @app.route("/delete/<string:name>")
+@auth.login_required
 def DELETE(name):
     try:
-     user=User.query.filter_by(username=name).first()
-     db.session.delete(user)
-     db.session.commit()
+     user = models.User.query.filter_by(username=name).first()
+     models.db.session.delete(user)
+     models.db.session.commit()
      return "Silme başarılı"
     except:
       return "Kişi Bulunamadı"
-    
-    
 
-    
+
 
 
 if __name__ == '__main__':
