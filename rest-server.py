@@ -25,13 +25,13 @@ def get_auth_token():
     return jsonify({ 'token': token.decode('ascii') })
 
 @auth.verify_password
-def verify_password(username_or_token, password):
-    # first try to authenticate by token
-    user = model.User.verify_auth_token(username_or_token)
+def verify_password(name, pas):
+
+    user = model.User.verify_auth_token(name)
     if not user:
-        # try to authenticate with username/password
-        user = model.User.query.filter_by(username = username_or_token).first()
-        if not user or not user.verify_password(password):
+
+        user = model.User.query.filter_by(username = name).first()
+        if not user or not user.verify_password(pas):
             return False
     g.user = user
     return True
@@ -80,7 +80,7 @@ def unauthorized():
 def not_found(error):
     return make_response(jsonify( { 'error': 'Not found' } ), 404)
 
-model.db.create_all()
+
 
 if __name__ == '__main__':
     app.run(debug = True)

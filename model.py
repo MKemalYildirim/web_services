@@ -36,8 +36,10 @@ class User(db.Model):
         try:
             data = s.loads(token)
         except SignatureExpired:
-            return None # valid token, but expired
+            return None
         except BadSignature:
-            return None # invalid token
+            return None
         user = User.query.get(data['id'])
         return user
+
+db.create_all()
